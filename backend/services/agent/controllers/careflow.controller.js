@@ -20,6 +20,7 @@ const STAFF = [
   { id: "dr-rao", name: "Dr. Vikram Rao" },
   { id: "dr-chen", name: "Dr. Lisa Chen" },
   { id: "dr-anubappal", name: "Dr. Anubappal" },
+  { id: "sp-iyer", name: "Dr. Meera Iyer" },
 ]
 
 const emptyClinical = () => ({
@@ -447,7 +448,8 @@ export const listCases = async (req, res, next) => {
 
 export const seedDemoPatients = async (req, res, next) => {
   try {
-    const result = await seedMockPatients()
+    const replace = req.body?.replace !== false
+    const result = await seedMockPatients({ replace })
     const cases = await getCaseIndex()
     return res.status(200).json({ ...result, cases })
   } catch (error) {

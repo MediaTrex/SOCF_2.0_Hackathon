@@ -1,8 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { Bell } from 'lucide-react'
-import { useSelector } from 'react-redux'
+import { Bell, LogOut } from 'lucide-react'
+import { useDispatch, useSelector } from 'react-redux'
 import CarePilotLogo from '../CarePilotLogo'
+import logOut from '../../features/logOut'
+import { setUserdata } from '../../redux/userSlice'
 
 const NAV_ITEMS = [
   { to: '/', id: 'command', label: 'Dashboard', end: true },
@@ -16,7 +18,9 @@ const NAV_ITEMS = [
 
 function AppShell({ children }) {
   const location = useLocation()
+  const dispatch = useDispatch()
   const userData = useSelector((state) => state.user.userData)
+  const [signingOut, setSigningOut] = useState(false)
   const staffName =
     userData?.name || userData?.email || userData?.displayName || 'Staff'
   const initials = staffName
@@ -25,6 +29,17 @@ function AppShell({ children }) {
     .slice(0, 2)
     .join('')
     .toUpperCase()
+
+  const handleSignOut = async () => {
+    if (signingOut) return
+    setSigningOut(true)
+    try {
+      await logOut()
+    } finally {
+      dispatch(setUserdata(null))
+      setSigningOut(false)
+    }
+  }
 
   const isNavActive = (item) => {
     if (item.id === 'command') return location.pathname === '/'
@@ -88,6 +103,19 @@ function AppShell({ children }) {
                 <p className="text-[13px] font-medium text-[var(--cf-ink)]">{staffName}</p>
                 <p className="text-[11px] text-[var(--cf-ink-faint)]">Clinical staff</p>
               </div>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                disabled={signingOut}
+                aria-label="Sign out"
+                title="Sign out"
+                className="ml-1 inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg border border-[var(--cf-border)] bg-white text-[12.5px] font-medium text-[var(--cf-ink-soft)] hover:bg-[var(--cf-surface-sunken)] hover:text-[var(--cf-ink)] cursor-pointer disabled:opacity-60"
+              >
+                <LogOut size={14} />
+                <span className="hidden sm:inline">
+                  {signingOut ? 'Signing out…' : 'Sign out'}
+                </span>
+              </button>
             </div>
           </div>
         </div>
